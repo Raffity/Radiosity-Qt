@@ -32,8 +32,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent *pe)
         application->camera.yaw -= zRot ;
         application->camera.pitch -= xRot ;
         application->camera.applyTransformation();
-        if(application->dispFunc) {application->reshapeFunc();}
-        else {application->preview();}
+        if(application->dispFunc)
+        {application->reshapeFunc();}
+        else
+        {application->preview();}
         ptrMousePosition = pe->pos();
         updateGL();
     }
@@ -55,7 +57,10 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::wheelEvent(QWheelEvent* pe)
 {
-   if ((pe->delta())>0) scale_plus(); else if ((pe->delta())<0) scale_minus();
+   if ((pe->delta())<0) scale_plus();
+   else if ((pe->delta())>0) scale_minus();
+   if(application->dispFunc) {application->reshapeFunc();}
+   else {application->preview();}
    updateGL();
 }
 
@@ -64,47 +69,41 @@ void GLWidget::keyPressEvent(QKeyEvent* pe)
    switch (pe->key())
    {
       case Qt::Key_A:
-         application->camera.position = application->camera.position + vec3(0,0,zTra);
-         application->camera.applyTransformation();
+         application->camera.position += vec3(0,0,zTra);
          if(application->dispFunc) {application->reshapeFunc();}
          else {application->preview();}
          updateGL();
       break;
 
       case Qt::Key_D:
-         application->camera.position = application->camera.position - vec3(0,0,zTra);
-         application->camera.applyTransformation();
+         application->camera.position -= vec3(0,0,zTra);
          if(application->dispFunc) {application->reshapeFunc();}
          else {application->preview();}
          updateGL();
       break;
 
    case Qt::Key_W:
-      application->camera.position = application->camera.position + vec3(0,zTra,0);
-      application->camera.applyTransformation();
+      application->camera.position += vec3(0,zTra,0);
       if(application->dispFunc) {application->reshapeFunc();}
       else {application->preview();}
       updateGL();
    break;
 
    case Qt::Key_S:
-      application->camera.position = application->camera.position - vec3(0,zTra,0);
-      application->camera.applyTransformation();
+      application->camera.position -= vec3(0,zTra,0);
       if(application->dispFunc) {application->reshapeFunc();}
       else {application->preview();}
       updateGL();
    break;
-   case Qt::Key_E:
-      application->camera.position = application->camera.position + vec3(zTra,0,0);
-      application->camera.applyTransformation();
+   case Qt::Key_Q:
+      application->camera.position += vec3(zTra,0,0);
       if(application->dispFunc) {application->reshapeFunc();}
       else {application->preview();}
       updateGL();
    break;
 
-   case Qt::Key_Q:
-      application->camera.position = application->camera.position - vec3(zTra,0,0);
-      application->camera.applyTransformation();
+   case Qt::Key_E:
+      application->camera.position -= vec3(zTra,0,0);
       if(application->dispFunc) {application->reshapeFunc();}
       else {application->preview();}
       updateGL();
@@ -114,12 +113,19 @@ void GLWidget::keyPressEvent(QKeyEvent* pe)
 
 void GLWidget::scale_plus()
 {
-   nSca = nSca*1.1;
+    if(application->camera.sX > 0.1)
+    {
+        application->camera.sX -= 0.1;
+        application->camera.sY -= 0.1;
+        application->camera.sZ -= 0.1;
+    }
 }
 
 void GLWidget::scale_minus()
 {
-   nSca = nSca/1.1;
+    application->camera.sX += 0.1;
+    application->camera.sY += 0.1;
+    application->camera.sZ += 0.1;
 }
 
 void GLWidget::rotate_up()
@@ -156,5 +162,3 @@ void GLWidget::defaultScene()
 {
    xRot=0; yRot=0; zRot=0; zTra=1; nSca=1;
 }
-
-

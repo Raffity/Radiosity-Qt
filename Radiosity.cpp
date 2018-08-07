@@ -5,24 +5,28 @@
 #include <fstream>
 #include <sstream>
 #include <object.h>
+#include <algorithm>
 
 using namespace std;
 
-long faceIndex = 0;
+
 void Radiosity::assembly(Object *obj)
 {
     for(int i=0;i<obj->countVertex;i++)
     {
         vertices.push_back(obj->getVertices()[i]);
-        vertexColors.push_back(obj->getVertexColors()[i]);
+        vertexColors.push_back(obj->getColorV());
     }
     for(int i=0;i<obj->countFaces;i++)
     {
-        faces.push_back(obj->getFaces()[i]);
-        faceEmissions.push_back(obj->getFaceEmissions()[i]);
-        faceReflectivities.push_back(obj->getFaceReflectivities()[i]);
+        faces.push_back(uvec3(obj->getFaces()[i].x + vertxCount,
+                              obj->getFaces()[i].y + vertxCount,
+                              obj->getFaces()[i].z + vertxCount));
+        faceEmissions.push_back(obj->getEmissionColorV() );
+        faceReflectivities.push_back(obj->getColorV());
         faceIndex++;
     }
+    vertxCount = vertices.size();
 }
 
 void Radiosity::buildVertexToFaceMap() {
@@ -46,23 +50,23 @@ void Radiosity::buildVertexToFaceMap() {
 void Radiosity::render() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         for (unsigned int fi = 0; fi < faces.size(); fi++) {
-        uvec3& face =  faces[fi];
-        vec3& v1 = vertices[face.x];
-        vec3& v2 = vertices[face.y];
-        vec3& v3 = vertices[face.z];
+            uvec3& face =  faces[fi];
+            vec3& v1 = vertices[face.x];
+            vec3& v2 = vertices[face.y];
+            vec3& v3 = vertices[face.z];
 
-        vec3& c1 = vertexColors[face.x];
-        vec3& c2 = vertexColors[face.y];
-        vec3& c3 = vertexColors[face.z];
+            vec3& c1 = vertexColors[face.x];
+            vec3& c2 = vertexColors[face.y];
+            vec3& c3 = vertexColors[face.z];
 
-        glBegin(GL_TRIANGLES);
-            glColor3f(c1.x, c1.y, c1.z);
-            glVertex3f(v1.x, v1.y, v1.z);
-            glColor3f(c2.x, c2.y, c2.z);
-            glVertex3f(v2.x, v2.y, v2.z);
-            glColor3f(c3.x, c3.y, c3.z);
-            glVertex3f(v3.x, v3.y, v3.z);
-        glEnd();
+            glBegin(GL_TRIANGLES);
+                glColor3f(c1.x, c1.y, c1.z);
+                glVertex3f(v1.x, v1.y, v1.z);
+                glColor3f(c2.x, c2.y, c2.z);
+                glVertex3f(v2.x, v2.y, v2.z);
+                glColor3f(c3.x, c3.y, c3.z);
+                glVertex3f(v3.x, v3.y, v3.z);
+            glEnd();
     }
 }
 
@@ -74,18 +78,18 @@ void Radiosity::autoCalculateNormals () {
         vec3& v1 = vertices[face.x];
         vec3& v2 = vertices[face.y];
         vec3& v3 = vertices[face.z];
-        vec3 normal = cross(v2 - v1, v3 - v1);
+        vec3 normal = cross(v2 - v1, v3 - v2);
         normal.normalize();
         faceNormals.push_back(normal);
     }
 }
 
-void Radiosity::calculateFormFactors(int hemicubeResolution) {
+void Radiosity::calculateFormFactorsHemicube(int hemicubeResolution) {
     formFactors.clear();
     formFactors = vector<vector<float>> (faces.size(), vector<float>(faces.size(), 0.0f));
     for (unsigned int f = 0; f < faces.size(); f++) {
 
-        int *pixelCount =new int[faces.size()]{0};
+        int *pixelCount = new int[faces.size()]{0};
         uvec3& face = faces[f];
         vec3 centroid = (vertices[face.x] + vertices[face.y] + vertices[face.z]) * 0.333333f;
 
@@ -177,9 +181,7 @@ void Radiosity::renderColorCoded() {
         vec3& v1 = vertices[face.x];
         vec3& v2 = vertices[face.y];
         vec3& v3 = vertices[face.z];
-
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
         uvec3& color = faceColorCodes[fi];
         glColor3ub(color.x, color.y, color.z);
         glBegin(GL_TRIANGLES);
@@ -195,7 +197,7 @@ uvec3 Radiosity::encodeColor (unsigned int f) {
     f = f + 1; 
     code.x = f % 256;
     code.y = (f >> 8) % 256;
-    code.z = (f >> 16) % 256; 
+    code.z = (f >> 16) % 256;
     return code;
 }
 
@@ -219,7 +221,7 @@ void Radiosity::interpolateColors() {
         for (int fi = 0; fi < nearFaces.size(); fi++) {
             color.add(radiosities[nearFaces[fi]]);
         }
-        color = color / (float) nearFaces.size();
+        //color = color / (float)2;
         vertexColors[vi] = color;
     }
 }

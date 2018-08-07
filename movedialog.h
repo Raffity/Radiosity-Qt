@@ -6,6 +6,7 @@
 #include <vec3.h>
 #include <vector>
 #include <object.h>
+#include <vec3.h>
 
 using namespace std;
 
@@ -26,8 +27,6 @@ signals:
     void moved();
 
 private slots:
-    void on_buttonBox_accepted();
-
     void on_doubleSpinBox_valueChanged(double arg1);
 
     void on_spinBox_valueChanged(int arg1);
@@ -42,37 +41,35 @@ private slots:
 
     void on_horizontalSlider_3_sliderMoved(int position);
 
-    void on_horizontalSlider_sliderReleased();
-
-    void on_horizontalSlider_2_sliderReleased();
-
-    void on_horizontalSlider_3_sliderReleased();
-
-    void on_horizontalSlider_4_sliderReleased();
-
-    void on_horizontalSlider_4_sliderMoved(int position);
-
     void on_doubleSpinBox_2_valueChanged(double arg1);
 
     void on_doubleSpinBox_3_valueChanged(double arg1);
 
+    void on_horizontalSlider_7_sliderMoved(int position);
+
+    void on_horizontalSlider_6_sliderMoved(int position);
+
+    void on_horizontalSlider_5_sliderMoved(int position);
+
+
 private:
     Ui::moveDialog *ui;
     Object *obj;
-
     float diff=0;
     void moveX();
     void moveY();
     void moveZ();
-    void rotX(double angel);
-    void rotY(double angel);
-    void rotZ(double angel);
-    double valX=0;
-    double valY=0;
-    double valZ=0;
-    double centerX;
-    double centerY;
-    double centerZ;
+    void rotX(int angel);
+    void rotY(int angel);
+    void rotZ(int angel);
+    void scaleX(int n);
+    void scaleY(int n);
+    void scaleZ(int n);
+    void culcCenterObj();
+    float valX=0, valY=0, valZ=0;
+    int rX=0,rY=0,rZ=0;
+    double sX=1,sY=0,sZ=0;
+    vec3 center = vec3(0,0,0);
 };
 
 #endif // MOVEDIALOG_H

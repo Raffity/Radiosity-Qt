@@ -38,7 +38,7 @@ private slots:
     void on_action_3_triggered();
     void on_action_4_triggered();
     void on_pushButton_10_clicked();
-
+    void resizeEvent(QResizeEvent* event);
 
     void on_listWidget_clicked(const QModelIndex &index);
 
@@ -46,9 +46,15 @@ private slots:
 
     void on_pushButton_12_clicked();
 
+    void on_comboBox_3_currentIndexChanged(const QString &arg1);
+
+    void on_button_2_clicked();
+
+    void on_MainWindow_iconSizeChanged(const QSize &iconSize);
+
 private:
     Ui::MainWindow *ui;
-    Application *app;
+    Application *app = NULL;
     bool check=false;
 };
 

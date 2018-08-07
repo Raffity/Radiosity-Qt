@@ -16,44 +16,37 @@ public:
     Object();
     unsigned int countVertex=0; //число вершин объекта
     unsigned int countFaces=0; //число патчей объекта
-    bool selected=false;
+    bool selected = false;
     string mtl;
 
-    string getName();   //Возвращает имя объекта
-    void setName(string Name);      //Устанавливает имя объекта и очищает все данные
-    void loadPoint(vec3 point);     //Загружает одну точку объекта
+    string getName();
+    void setName(string Name);
+    void loadPoint(vec3 point);
     void loadMovedPoint(int numPoint,vec3 point);
-    void loadFace(uvec3 face);      //Загружает один патч
-    void loadPreFace(uvec3 face);
+    void loadFace(uvec3 face);
 
     void setColor(QColor pcolor);     //Устанавливает цвет объекта
+    void setColor(vec3 pcolor);
     void setEmissionColor(QColor pcolor,int strength);    //Устанавливает излучающий цвет объекта
-    void setColor(vec3 pcolor);     //Устанавливает цвет объекта
-    void setEmissionColor(vec3 pcolor);    //Устанавливает излучающий цвет объекта
+    void setEmissionColor(vec3 pcolor);
     void deleteVertices();
 
     std::vector<vec3> getVertices();
-    std::vector<vec3> getVertexColors();
     std::vector<uvec3> getFaces();
-    std::vector<uvec3> getPreFaces();
-    std::vector<vec3> getFaceEmissions();
-    std::vector<vec3> getFaceReflectivities();
-
-    QColor getColor();        //Возвращает цвет объекта
-    QColor getEmissionColor();   //Возвращает излучающий цвет объекта
+    QColor getColor();
+    QColor getEmissionColor();
+    vec3 getColorV();
+    vec3 getEmissionColorV();
+    int getEmissionStrength();
 
 protected:
 
     int str;
-    string name;   //имя объекта
-    vec3 color;    //цвет объекта
+    vec3 color;          //цвет объекта
     vec3 emissionColor; //излучающий цвет объекта
+    string name;        //имя объекта
     std::vector<vec3> vertices; //вектор вершин
-    std::vector<vec3> vertexColors; //цвет вершины
-    std::vector<uvec3> faces;   //вектор номеров вершин, образующих патч
-    std::vector<uvec3> preFaces;   //вектор с номерами вершин для каждого объекта
-    std::vector<vec3> faceEmissions;    //излучающий цвет поверхности
-    std::vector<vec3> faceReflectivities;   //цвет поверхности
+    std::vector<uvec3> faces; //вектор с номерами вершин для каждого объекта
 };
 
 #endif // OBJECT_H

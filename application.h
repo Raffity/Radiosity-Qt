@@ -13,9 +13,12 @@ class Application
 public:
     GLenum style = GL_LINE;
     Application();
+
     Camera camera;
-    Radiosity *scene;
-    bool dispFunc;
+    bool dispFunc = false;
+    int totalVertex = 0;
+    int totalFaces = 0;
+    int width, height;
     QVector<Object> objects;
     QVector<colorMTL> colors;
 
@@ -23,19 +26,24 @@ public:
     Object *getObject(int numObj);           //возвращает указатель на выбранный объект из списка объектов
     bool loadFromOBJFile (QString filname);    //загрузка геометрии сцены из файла
     bool loadFromMTLFile (QString filename);    //загрузка текстур сцены из файла
-    bool saveSceneToObj();
+    bool saveSceneToObj();                      //сохранение сцены в формате obj
     void searchMTLtoOBJ();
-    void preview();                 //отображение сцены в режиме превью
+    void preview();                         //отображение сцены в режиме превью
+    void addExistingObj(QString nameObj);   //добавление нового объекта на сцену
 
-    bool init(QString filename,int h,int w);
-    void reshapeFunc();
+    bool init(QString filename);                //установка параметров отображения
+    void reshapeFunc();                         //перерисовка отрендеренной сцены
     void displayFunc();                         //отображение сцены после рендера
-    void idleFunc(int maxIterations, int hemicubeResolution);
+    void idleFunc(int maxIterations, int hemicubeResolution); //расчет форм-факторов и излучательности
+    void previewCreator();
 
-protected:
+private:
+    Radiosity *scene = NULL;
     int hemi=0;
-    int width, height;
     int numIterations;
+    vector<vec3> previewPoints;
+    vector<vec3> previewColors;
+    vector<uvec3> previewFaces;
 };
 
 #endif // APPLICATION_H

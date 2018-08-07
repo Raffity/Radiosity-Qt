@@ -5,7 +5,7 @@
 #include <QColor>
 #include <QPalette>
 
-ColorDialog::ColorDialog(QWidget *parent, QColor c1, QColor c2) :
+ColorDialog::ColorDialog(QWidget *parent, QColor c1, QColor c2,int emissionStrength):
     QDialog(parent),
     ui(new Ui::ColorDialog)
 {
@@ -16,6 +16,7 @@ ColorDialog::ColorDialog(QWidget *parent, QColor c1, QColor c2) :
     {
         ui->checkBox->setChecked(true);
         on_checkBox_clicked();
+        ui->spinBox->setValue(emissionStrength);
     }
     QPalette pal=palette();
     QPalette pal1=palette();

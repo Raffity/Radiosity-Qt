@@ -16,49 +16,53 @@ moveDialog::moveDialog(QWidget *parent) :
 
 moveDialog::~moveDialog()
 {
+    delete obj;
     delete ui;
 }
-
-double oldRotX=0, oldRotY=0, oldRotZ=0, oldScale=0;
 
 void moveDialog::setObject(Object *object)
 {
     obj = object;
+    culcCenterObj();
+    valX=0, valY=0, valZ=0;
+    rX=0,rY=0,rZ=0;
+    sX=1,sY=0,sZ=0;
+}
+
+void moveDialog::culcCenterObj()
+{
     double sumX=0,sumY=0,sumZ=0;
     for(int i=0;i<obj->getVertices().size();i++)
     {
-        sumX =+ obj->getVertices()[i].x;
-        sumY =+ obj->getVertices()[i].y;
-        sumZ =+ obj->getVertices()[i].z;
+        sumX += obj->getVertices()[i].x;
+        sumY += obj->getVertices()[i].y;
+        sumZ += obj->getVertices()[i].z;
     }
-    centerX = sumX/obj->countVertex;
-    centerY = sumY/obj->countVertex;
-    centerZ = sumZ/obj->countVertex;
-    ui->doubleSpinBox->setValue(centerX);
-    ui->doubleSpinBox_2->setValue(centerY);
-    ui->doubleSpinBox_3->setValue(centerZ);
+    center.x = sumX/obj->countVertex;
+    center.y = sumY/obj->countVertex;
+    center.z = sumZ/obj->countVertex;
+    ui->doubleSpinBox->setValue(center.x);
+    ui->doubleSpinBox_2->setValue(center.y);
+    ui->doubleSpinBox_3->setValue(center.z);
 }
 
-
-void moveDialog::rotX(double angle)
+void moveDialog::rotZ(int angle)
 {
-    double x,y,z;
+    float x,y,z;
     for(int i=0; i<obj->getVertices().size(); i++)
     {
         x = obj->getVertices()[i].x;
         y = obj->getVertices()[i].y;
         z = obj->getVertices()[i].z;
         obj->loadMovedPoint(i,vec3(
-//                                x * cos(angle) + y *sin(angle),
-//                                x * sin(angle) + y *cos(angle),
-//                                z
-                                (x - centerX) *cos(angle) - (y - centerY) *sin(angle) + centerX,
-                                (y - centerY) *cos(angle) + (x - centerX) *sin(angle)  + centerY ,
+                               ((x - center.x) * cos(angle*M_PI/180)) - ((y - center.y) * sin(angle*M_PI/180)) + center.x,
+                                ((y - center.y) * cos(angle*M_PI/180)) + ((x - center.x) * sin(angle*M_PI/180))  + center.y ,
                                 z
                                 ));
     }
+    culcCenterObj();
 }
-void moveDialog::rotY(double angle)
+void moveDialog::rotY(int angle)
 {
     double x,y,z;
     for(int i=0; i<obj->getVertices().size(); i++)
@@ -67,13 +71,14 @@ void moveDialog::rotY(double angle)
         y = obj->getVertices()[i].y;
         z = obj->getVertices()[i].z;
         obj->loadMovedPoint(i,vec3(
-                                  (x - centerX) *cos(angle) + (z - centerZ) *sin(angle) + centerX,
+                                  (x - center.x) * cos(angle * M_PI/180) + (z - center.z) * sin(angle*M_PI/180) + center.x,
                                    y,
-                                   -(x - centerX) *sin(angle) + (z - centerZ) *cos(angle) + centerZ
+                                   -(x - center.x) * sin(angle * M_PI/180) + (z - center.z) * cos(angle*M_PI/180) + center.z
                                 ));
     }
+    culcCenterObj();
 }
-void moveDialog::rotZ(double angle)
+void moveDialog::rotX(int angle)
 {
     double x,y,z;
     for(auto i=0; i<obj->getVertices().size(); i++)
@@ -82,15 +87,16 @@ void moveDialog::rotZ(double angle)
         y = obj->getVertices()[i].y;
         z = obj->getVertices()[i].z;
         obj->loadMovedPoint(i,vec3(x,
-                                   (y - centerY) * cos(angle) - (z - centerZ) * sin(angle) + centerY,
-                                   (y - centerY) * sin(angle) + (z - centerZ) * cos(angle) + centerZ
+                                   (y - center.y) * cos(angle*M_PI/180) - (z - center.z) * sin(angle*M_PI/180) + center.y,
+                                   (y - center.y) * sin(angle*M_PI/180) + (z - center.z) * cos(angle*M_PI/180) + center.z
                                    ));
     }
+    culcCenterObj();
 }
 
 void moveDialog::moveX()
 {
-    valX = obj->getVertices()[0].x;
+    valX = center.x;
     diff = ui->doubleSpinBox->value() - valX;
     if(diff!=0)
     {
@@ -101,11 +107,12 @@ void moveDialog::moveX()
                                      obj->getVertices()[i].z));
         }
     }
+    center.x+=diff;
 }
 
 void moveDialog::moveY()
 {
-    valY = obj->getVertices()[0].y;
+    valY = center.y;
     diff = ui->doubleSpinBox_2->value() - valY;
     if(diff!=0)
     {
@@ -116,11 +123,12 @@ void moveDialog::moveY()
                                      obj->getVertices()[i].z));
         }
     }
+    center.y+=diff;
 }
 
 void moveDialog::moveZ()
 {
-    valZ = obj->getVertices()[0].z;
+    valZ = center.z;
     diff = ui->doubleSpinBox_3->value() - valZ;
     if(diff!=0)
     {
@@ -131,6 +139,7 @@ void moveDialog::moveZ()
                                      obj->getVertices()[i].z + diff));
         }
     }
+    center.z+=diff;
 }
 
 void moveDialog::on_doubleSpinBox_valueChanged(double arg1)
@@ -151,76 +160,106 @@ void moveDialog::on_doubleSpinBox_3_valueChanged(double arg1)
     emit moved();
 }
 
-
-void moveDialog::on_buttonBox_accepted()
-{
-    emit moved();
-}
-
 void moveDialog::on_horizontalSlider_sliderMoved(int position)
 {
     ui->spinBox->setValue(position);
+    rotX(position - rX);
+    emit moved();
+    culcCenterObj();
+    rX = position;
 }
 
 void moveDialog::on_horizontalSlider_2_sliderMoved(int position)
 {
     ui->spinBox_2->setValue(position);
+    rotY(position - rY);
+    emit moved();
+    culcCenterObj();
+    rY = position;
 }
 
 void moveDialog::on_horizontalSlider_3_sliderMoved(int position)
 {
     ui->spinBox_3->setValue(position);
-}
-
-void moveDialog::on_horizontalSlider_sliderReleased()
-{
-    rotX(ui->horizontalSlider->value());
+    rotZ(position - rZ);
     emit moved();
+    culcCenterObj();
+    rZ = position;
 }
 
-void moveDialog::on_horizontalSlider_2_sliderReleased()
+void moveDialog::on_horizontalSlider_7_sliderMoved(int position)
 {
-    rotY(ui->horizontalSlider_2->value());
-    emit moved();
-}
-
-void moveDialog::on_horizontalSlider_3_sliderReleased()
-{
-    rotZ(ui->horizontalSlider_3->value());
-    emit moved();
-}
-
-void moveDialog::on_horizontalSlider_4_sliderReleased()
-{
+    ui->label_10->setText(QString::number((double)position/250));
+    sX = (double)position/150 - sX + 1;
     for(int i=0; i<obj->getVertices().size(); i++)
     {
         obj->loadMovedPoint(i,vec3(
-                                obj->getVertices()[i].x * ui->horizontalSlider_4->value() / 100,
-                                obj->getVertices()[i].y * ui->horizontalSlider_4->value() / 100,
-                                obj->getVertices()[i].z * ui->horizontalSlider_4->value() / 100
+                                obj->getVertices()[i].x * sX ,
+                                obj->getVertices()[i].y ,
+                                obj->getVertices()[i].z
                                 ));
     }
-     emit moved();
+    sX = (double)position/150;
+    emit moved();
+    culcCenterObj();
 }
 
-void moveDialog::on_horizontalSlider_4_sliderMoved(int position)
+void moveDialog::on_horizontalSlider_6_sliderMoved(int position)
 {
-    double pos = double(position);
-    ui->label_10->setText(QString::number(pos/100));
-
+    ui->label_14->setText(QString::number((double)position/250));
+    sY = (double)position/200 - sY + 1;
+    for(int i=0; i<obj->getVertices().size(); i++)
+    {
+        obj->loadMovedPoint(i,vec3(
+                                obj->getVertices()[i].x ,
+                                obj->getVertices()[i].y * sY,
+                                obj->getVertices()[i].z
+                                ));
+    }
+     sY = (double)position/200;
+     emit moved();
+     culcCenterObj();
 }
 
+void moveDialog::on_horizontalSlider_5_sliderMoved(int position)
+{
+    ui->label_15->setText(QString::number((double)position/250));
+    sZ = (double)position/200 - sZ + 1;
+    for(int i=0; i<obj->getVertices().size(); i++)
+    {
+        obj->loadMovedPoint(i,vec3(
+                                obj->getVertices()[i].x ,
+                                obj->getVertices()[i].y ,
+                                obj->getVertices()[i].z * sZ
+                                ));
+    }
+     sZ = (double)position/200;
+     emit moved();
+     culcCenterObj();
+}
+
+//rotationX
 void moveDialog::on_spinBox_valueChanged(int arg1)
 {
-
+    rotX(arg1 - rX);
+    emit moved();
+    culcCenterObj();
+    rX = arg1;
 }
-
+//rotationY
 void moveDialog::on_spinBox_2_valueChanged(int arg1)
 {
-
+    rotY(arg1 - rY);
+    emit moved();
+    culcCenterObj();
+    rY = arg1;
 }
-
+//rotationZ
 void moveDialog::on_spinBox_3_valueChanged(int arg1)
 {
-
+    rotZ(arg1 - rZ);
+    emit moved();
+    culcCenterObj();
+    rZ = arg1;
 }
+

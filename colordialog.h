@@ -15,7 +15,7 @@ class ColorDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ColorDialog(QWidget *parent, QColor c1,  QColor c2);
+    explicit ColorDialog(QWidget *parent, QColor c1,  QColor c2, int emissionStrength);
     ~ColorDialog();
 
 signals:

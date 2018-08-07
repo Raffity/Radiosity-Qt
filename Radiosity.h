@@ -15,7 +15,7 @@ class Radiosity
         Radiosity() {}
 
         void assembly(Object *obj);
-        void calculateFormFactors (int hemicubeResolution); //расчет форм факторов
+        void calculateFormFactorsHemicube (int hemicubeResolution); //расчет форм факторов
         void calculateRadiosities ();                       //расчет излучательности
         void render();                                      //рендер
         void renderColorCoded();
@@ -26,7 +26,7 @@ class Radiosity
         unsigned int decodeColor (uvec3 color);
 
     protected:
-
+        int faceIndex = 0, vertxCount = 0;
         std::vector<vec3> vertices;		
         std::vector<uvec3> faces;		
         std::vector<vec3> faceNormals;	

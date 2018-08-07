@@ -38,6 +38,17 @@ struct vec3
         y += b.y;
         z += b.z;
     }
+
+    void operator += (const vec3& b){
+        x += b.x;
+        y += b.y;
+        z += b.z;
+    }
+    void operator -= (const vec3& b){
+        x -= b.x;
+        y -= b.y;
+        z -= b.z;
+    }
 };
 
 inline vec3 operator - (const vec3& a)    {
